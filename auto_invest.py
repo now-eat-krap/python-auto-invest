@@ -18,7 +18,7 @@ with open("/root/auto_invest/api/api.txt") as f:
     secret = lines[1].strip()
 
 with open("/root/auto_invest/indicator/variable.txt") as f:
-    lines = f.readlines
+    lines = f.readlines()
     sensitivity  = int(lines[0].strip())
     atr_period = int(lines[1].strip())
 
@@ -70,25 +70,17 @@ class Indicators:
 
 def main():
     exchange.load_markets()
-    logging.basicConfig(filename='/root/bybit/ut/error/error.log', level=logging.ERROR)
     indicator = Indicators()
 
     while True:
-        now = datetime.now()
     #if now.minute % 5 == 0:
     #    time.sleep(1)
-        try:
-            open_ = check.open_orders()
-            position_ = check.positions()
+        data_ = now_ohlcv()
+        indicator.ut_bot_alerts(data_)
 
-            data_ = now_ohlcv()
-            indicator.ut_bot_alerts(data_)
+        pprint.pprint(data_)
+        time.sleep(5)
 
-            time.sleep(5)
-
-        except:
-            print("error:",now)
-            logging.error(traceback.format_exc())
 
 if __name__ == '__main__':
     main()
