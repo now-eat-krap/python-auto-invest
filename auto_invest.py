@@ -30,7 +30,7 @@ exchange = ccxt.bybit(config={
 
 def now_ohlcv():
     df = pd.DataFrame()
-    ohlcv = exchange.fetch_ohlcv(symbols, '1m', limit=402)
+    ohlcv = exchange.fetch_ohlcv(symbols, '5m', limit=402)
     now_ohlcv = exchange.fetch_ticker(symbols)
 
     time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
@@ -66,14 +66,14 @@ class Indicators:
         df["Below"] = ema.ma_crossed_below(df["ATRTrailingStop"])
         df["Buy"] = (df["close"] > df["ATRTrailingStop"]) & (df["Above"]==True)
         df["Sell"] = (df["close"] < df["ATRTrailingStop"]) & (df["Below"]==True)
-        #df.drop(["xATR","nLoss","ATRTrailingStop","Above","Below"], axis=1, inplace=True)
+        df.drop(["xATR","nLoss","ATRTrailingStop","Above","Below"], axis=1, inplace=True)
 
 def main():
     exchange.load_markets()
     indicator = Indicators()
 
     while True:
-    # if now.minute % 5 == 0:
+     if now.minute % 5 == 0:
         time.sleep(1)
         data_ = now_ohlcv()
         indicator.ut_bot_alerts(data_)
