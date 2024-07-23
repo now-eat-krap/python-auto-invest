@@ -74,13 +74,13 @@ def main():
     now = datetime.now()
 
     while True:
-     if now.minute % 5 == 0:
-        time.sleep(1)
-        data_ = now_ohlcv()
-        indicator.ut_bot_alerts(data_)
+        if now.minute % 5 == 0:
+            time.sleep(1)
+            data_ = now_ohlcv()
+            indicator.ut_bot_alerts(data_)
 
-        pprint.pprint(data_)
-        time.sleep(5)
+            pprint.pprint(data_)
+            time.sleep(5)
 
 
 if __name__ == '__main__':
