@@ -138,28 +138,33 @@ class Indicators:
             df.loc[len(df)-1,"Buy"] = False
             df.loc[len(df)-1,"Sell"] = False
 
-        return df
-
 def main():
     exchange.load_markets()
     indicator = Indicators()
     initial_data = data_setting()
     data = indicator.now_data(initial_data)
-    data = indicator.ut_bot_alerts(data)
+    indicator.ut_bot_alerts(data)
+    print(str(datetime.now().minute)[1:])
 
     while True:
      now = datetime.now()
-     if now.minute % 5 == 0:
-        time.sleep(1)
-        data = indicator.now_data(data)
-        data = indicator.ut_bot_alerts(data)
+     if now.minute % 5 == 0 and now.second < 10:
+         time.sleep(1)
+         data = indicator.now_data(data)
+         indicator.ut_bot_alerts(data)
+         # 첫번째 데이터 삭제
+         if len(data) != 3:
+             data = data.iloc[1:]
+             data.index = [_ for _ in range(len(data))]
 #        data_ = now_ohlcv()
 #        indicator.ut_bot_alerts(data_)
 
-        pprint.pprint(data)
-        time.sleep(40)
+         pprint.pprint(data)
+         time.sleep(40)
+     elif str(now.minute)[1:] == "4" or str(now.minute)[1:] == "8":
+         time.sleep(0.1)
      else:
-        time.sleep(1)
+         time.sleep(50)
 
 if __name__ == '__main__':
     main()

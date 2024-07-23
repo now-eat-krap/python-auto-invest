@@ -71,6 +71,7 @@ class Indicators:
 def main():
     exchange.load_markets()
     indicator = Indicators()
+    now = datetime.now()
 
     while True:
      if now.minute % 5 == 0:
