@@ -39,8 +39,7 @@ def now_ohlcv():
 
     ohlcv += ohlcv_now
     time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
-    #+ timedelta(hours=9)
-    #time[-1] = datetime.strptime(now_ohlcv['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ')+ timedelta(hours=9)
+
     df['time'] = time
     df['open'] = np.array(ohlcv).T[1]
     df['high'] = np.array(ohlcv).T[2]
