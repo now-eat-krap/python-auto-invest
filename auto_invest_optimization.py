@@ -12,12 +12,12 @@ import traceback
 
 symbols = "ETH/USDT:USDT"
 
-with open("/root/auto_invest/api/api.txt") as f:
+with open("/root/python-auto-invest/api/api.txt") as f:
     lines = f.readlines()
     api_key = lines[0].strip()
     secret = lines[1].strip()
 
-with open("/root/auto_invest/indicator/variable.txt") as f:
+with open("/root/python-auto-invest/indicator/variable.txt") as f:
     lines = f.readlines()
     sensitivity  = int(lines[0].strip())
     atr_period = int(lines[1].strip())
@@ -33,9 +33,13 @@ ATR_PERIOD = atr_period
 
 def data_setting():
     df = pd.DataFrame()
-    ohlcv = exchange.fetch_ohlcv(symbols, '5m', limit=1000)
-    now_ohlcv = exchange.fetch_ticker(symbols)
+    ohlcv_now= exchange.fetch_ohlcv(symbols, '5m', limit=1000)
+    ohlcv = []
 
+    for _ in range(4):
+        ohlcv += exchange.fetch_ohlcv(symbols, '5m',since=int(ohlcv_now[0][0]- (4-_) * 500000000), limit=1000)
+
+    ohlcv += ohlcv_now
     time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
 
     # setting ohlc
@@ -45,11 +49,9 @@ def data_setting():
     df['low'] = np.array(ohlcv).T[3]
     df['close'] = np.array(ohlcv).T[4]
 
-
     df["xATR"] = ta.atr(df['high'],df['low'],df['close'], ATR_PERIOD)
     df["nLoss"] = SENSITIVITY * df["xATR"]
     df["ATRTrailingStop"] = [0.0] + [np.nan for i in range(len(df) - 1)]
-
     # setting ATRTrailingStop
     for i in range(1, len(df)):
         if df.loc[i, "close"] > df.loc[i - 1, "ATRTrailingStop"] and df.loc[i - 1, "close"] > df.loc[i - 1, "ATRTrailingStop"]:
@@ -80,7 +82,7 @@ class Indicators:
         now_data_ = pd.DataFrame()
         ohlcv = exchange.fetch_ohlcv(symbols, '5m', limit=2)
 
-        now_ohlcv = exchange.fetch_ticker(symbols)
+        #now_ohlcv = exchange.fetch_ticker(symbols)
 
         time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
 

@@ -12,12 +12,12 @@ import traceback
 
 symbols = "ETH/USDT:USDT"
 
-with open("/root/auto_invest/api/api.txt") as f:
+with open("/root/python-auto-invest/api/api.txt") as f:
     lines = f.readlines()
     api_key = lines[0].strip()
     secret = lines[1].strip()
 
-with open("/root/auto_invest/indicator/variable.txt") as f:
+with open("/root/python-auto-invest/indicator/variable.txt") as f:
     lines = f.readlines()
     sensitivity  = int(lines[0].strip())
     atr_period = int(lines[1].strip())
@@ -29,8 +29,11 @@ exchange = ccxt.bybit(config={
 })
 
 def now_ohlcv():
+    #since = "2024-07-27 14:55:00" 402  29 9:15
+    since = "2024-07-25 13:05:00"
+    since = int(pd.to_datetime(since).timestamp() * 1000)
     df = pd.DataFrame()
-    ohlcv = exchange.fetch_ohlcv(symbols, '5m', limit=402)
+    ohlcv = exchange.fetch_ohlcv(symbols, '5m', since=since, limit=1000)
     now_ohlcv = exchange.fetch_ticker(symbols)
 
     time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
@@ -66,21 +69,24 @@ class Indicators:
         df["Below"] = ema.ma_crossed_below(df["ATRTrailingStop"])
         df["Buy"] = (df["close"] > df["ATRTrailingStop"]) & (df["Above"]==True)
         df["Sell"] = (df["close"] < df["ATRTrailingStop"]) & (df["Below"]==True)
-        df.drop(["xATR","nLoss","ATRTrailingStop","Above","Below"], axis=1, inplace=True)
+        #df.drop(["xATR","nLoss","ATRTrailingStop","Above","Below"], axis=1, inplace=True)
+        print(df.to_string())
 
 def main():
     exchange.load_markets()
     indicator = Indicators()
     now = datetime.now()
+    data_ = now_ohlcv()
+    indicator.ut_bot_alerts(data_)
 
-    while True:
-        if now.minute % 5 == 0:
-            time.sleep(1)
-            data_ = now_ohlcv()
-            indicator.ut_bot_alerts(data_)
+    #while True:
+    #    if now.minute % 5 == 0:
+    #        time.sleep(1)
+    #        data_ = now_ohlcv()
+    #        indicator.ut_bot_alerts(data_)
 
-            pprint.pprint(data_)
-            time.sleep(5)
+    #        pprint.pprint(data_)
+    #        time.sleep(5)
 
 
 if __name__ == '__main__':
