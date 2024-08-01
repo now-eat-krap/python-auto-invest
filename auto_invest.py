@@ -29,13 +29,15 @@ exchange = ccxt.bybit(config={
 })
 
 def now_ohlcv():
-    #since = "2024-07-27 14:55:00" 402  29 9:15
-    since = "2024-07-25 13:05:00"
-    since = int(pd.to_datetime(since).timestamp() * 1000)
     df = pd.DataFrame()
-    ohlcv = exchange.fetch_ohlcv(symbols, '5m', since=since, limit=1000)
-    now_ohlcv = exchange.fetch_ticker(symbols)
 
+    ohlcv_now= exchange.fetch_ohlcv(symbols, '5m', limit=1000)
+    ohlcv = []
+
+    for _ in range(4):
+        ohlcv += exchange.fetch_ohlcv(symbols, '5m',since=int(ohlcv_now[0][0]- (4-_) * 500000000), limit=1000)
+
+    ohlcv += ohlcv_now
     time = [datetime.fromtimestamp(ohlcv[i][0]/1000) for i in range(len(ohlcv))]
     #+ timedelta(hours=9)
     #time[-1] = datetime.strptime(now_ohlcv['datetime'], '%Y-%m-%dT%H:%M:%S.%fZ')+ timedelta(hours=9)
